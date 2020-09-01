@@ -33,6 +33,7 @@ namespace notepad
     public class MainActivity : AppCompatActivity
     {
         CultureInfo cl = new CultureInfo("en-US");
+        private MediaRecorder recorder;
         private string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
         private int id;
         private Button menuChoose;
@@ -177,29 +178,35 @@ namespace notepad
             ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.RecordAudio }, 105);
             Button newAudio = new Button(this);
             newAudio.TextAlignment = TextAlignment.ViewEnd;
-            newAudio.Hover += NewAudio_Hover;
+            newAudio.LongClick += NewAudio_LongClick;
             FindViewById<LinearLayout>(Resource.Id.audiolinear).AddView(newAudio);
         }
 
-        private void NewAudio_Hover(object sender, View.HoverEventArgs e)
+        private void NewAudio_LongClick(object sender, View.LongClickEventArgs e)
         {
-            var t = (Button) sender;
+            var t = (Button)sender;
             string filename = (t.Id).ToString();
             if (File.Exists(filename))
             {
                 File.Delete(filename);
             }
 
-            MediaRecorder recorder = new MediaRecorder();
+            recorder = new MediaRecorder();
             recorder.SetAudioSource(AudioSource.Mic);
             recorder.SetOutputFormat(OutputFormat.ThreeGpp);
             recorder.SetOutputFile(filename);
             recorder.Prepare();
             recorder.Start();
-
+            t.Click += T_Click;
         }
 
-
+        private void T_Click(object sender, EventArgs e)
+        {
+            recorder.Stop();
+            recorder.Release();
+            var t=(Button) sender;
+            File.Create((t.Id).ToString());
+        }
 
         private void SaveTextToBD()
             {
@@ -222,13 +229,26 @@ namespace notepad
                 //AndHUD.Shared.Dismiss(this);
             }
 
+        private void SaveImageToBD(ImageView newImage)
+        {
+            var database = MDbhelper.WritableDatabase;
+            var contentValues = new ContentValues();
+
+            contentValues.Put(DBhelper.ITKEY_ID, id);
+            contentValues.Put(DBhelper.IKEY_IMAGE, ((BitmapDrawable)(newImage).Drawable).Bitmap.strim());
+            if (database.)
+            {
+                database.Insert(DBhelper.TABLE_IMAGE, DBhelper.IKEY_ID + "= ?", contentValues);
+                //database.Insert(DBhelper.TABLE_IMAGE, DBhelper.ITKEY_ID + "= ?", new string[] { fordeleteButton.Id.ToString()});
+            }
+        }
 
             private void SaveToBD()
             {
                 AndHUD.Shared.Show(this, "Please, wait", 100, MaskType.Black, TimeSpan.FromSeconds(5));
                 var database = MDbhelper.WritableDatabase;
                 ContentValues contentValues;
-                database.BeginTransaction();
+                database.BeginTransaction(); 
                 try
                 {
                     contentValues = new ContentValues();
@@ -271,6 +291,7 @@ namespace notepad
                     contentValues.Put(DBhelper.ITKEY_ID, id);
                     contentValues.Put(DBhelper.IKEY_IMAGE, ((BitmapDrawable)((ImageView)x).Drawable).Bitmap.strim());
                     database.Insert(DBhelper.TABLE_IMAGE, null, contentValues);
+                    
                 });
                     database.SetTransactionSuccessful();
                 }
@@ -434,7 +455,7 @@ namespace notepad
 
             private void GoToMenu_Click(object sender, EventArgs e)
             {
-                SaveToBD();
+                //SaveToBD();
                 //AndHUD.Shared.Dismiss(this);
                 SetContentView(Resource.Layout.activity_menu);
                 LoadMenu();
@@ -518,10 +539,12 @@ namespace notepad
 
 
                             tmpView.Background = null;
-                            tmpView.LayoutChange += NewImage_LayoutChange;
+                            //tmpView.LayoutChange += NewImage_LayoutChange;
                             tmpView.SetImageBitmap(bitmap);
-                            tmpView.LayoutChange -= NewImage_LayoutChange;
-                        }
+                            SaveImageToBD(tmpView);
+                            //SaveToBD();
+                        //tmpView.LayoutChange -= NewImage_LayoutChange;
+                    }
 
                     }
                     AndHUD.Shared.Dismiss(this);
@@ -546,12 +569,14 @@ namespace notepad
             Bitmap bitmap = (Bitmap)data.Extras.Get("data");
             using (MemoryStream ms = new MemoryStream())
             {
-                bitmap.Compress(Bitmap.CompressFormat.Jpeg, 30, ms);
+                bitmap.Compress(Bitmap.CompressFormat.Jpeg, 100, ms);
                 bitmap = BitmapFactory.DecodeByteArray(ms.ToArray(), 0, ms.ToArray().Length);
             }
-            tmpView.LayoutChange += NewImage_LayoutChange;
+            //tmpView.LayoutChange += NewImage_LayoutChange;
             tmpView.SetImageBitmap(bitmap);
-            tmpView.LayoutChange -= NewImage_LayoutChange;
+            SaveImageToBD(tmpView);
+            //SaveToBD();
+            //tmpView.LayoutChange -= NewImage_LayoutChange;
         }
 
         private async void Camera_Click(object sender, EventArgs e)

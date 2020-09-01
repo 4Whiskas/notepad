@@ -91,15 +91,7 @@
                 </HorizontalScrollView>
             </LinearLayout>
 
-            <Button
-                android:id="@+id/addaudio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/changepicture"
-                android:layout_marginTop="5dp"
-                android:padding="10dp"
-                android:text="Add Audio"
-                android:textSize="18dp"/>
+            
             <Button
                 android:id="@+id/addbutton"
                 android:visibility="visible"
@@ -110,7 +102,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/imagebuttonstyle"/>
-
             <Button
                 android:visibility="invisible"
                 android:id="@+id/remakebutton"
@@ -131,6 +122,16 @@
                 android:textSize="18dp"
                 android:background="@drawable/deletebuttonstyle"
                 android:text="Delete image"/>
+            <Button
+              android:visibility="invisible"
+              android:id="@+id/addaudio"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/changepicture"
+              android:layout_marginTop="5dp"
+              android:padding="10dp"
+              android:text="Add Audio"
+              android:textSize="18dp"/>
         </LinearLayout>
 
         <ImageView
